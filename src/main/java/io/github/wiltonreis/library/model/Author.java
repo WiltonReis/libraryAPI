@@ -2,13 +2,18 @@ package io.github.wiltonreis.library.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
 @Entity
 @Table(name = "author")
+@EntityListeners(AuditingEntityListener.class)
 @Data
 public class Author {
 
@@ -20,7 +25,7 @@ public class Author {
     @Column(name = "name", length = 100, nullable = false)
     private String name;
 
-    @Column(name = "birth_of_date", nullable = false)
+    @Column(name = "birth_date", nullable = false)
     private LocalDate birthDate;
 
     @Column(name = "nationality", length = 50, nullable = false)
@@ -28,4 +33,15 @@ public class Author {
 
     @OneToMany(mappedBy = "author")
     private List<Book> books;
+
+    @CreatedDate
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @LastModifiedDate
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    @Column(name = "user_id")
+    private UUID userId;
 }
