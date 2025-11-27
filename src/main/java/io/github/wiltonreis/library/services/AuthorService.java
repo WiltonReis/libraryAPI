@@ -21,6 +21,11 @@ public class AuthorService {
         return authorRepository.save(author);
     }
 
+    public void updateAuthor(Author author){
+        if(author.getId() == null) throw new IllegalArgumentException("Author not registered");
+        authorRepository.save(author);
+    }
+
     public Optional<Author> getAuthor(UUID id){
         return authorRepository.findById(id);
     }

@@ -86,5 +86,23 @@ public class AuthorController {
         return ResponseEntity.ok(result);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<Void> updateAuthor(@PathVariable String id, @RequestBody AuthorDTO authorDTO){
+        UUID idAuthor = UUID.fromString(id);
+
+        Optional<Author> authorOptional = authorService.getAuthor(idAuthor);
+
+        if(authorOptional.isEmpty()) return ResponseEntity.notFound().build();
+
+        Author author = authorOptional.get();
+
+        author.setName(authorDTO.name());
+        author.setBirthDate(authorDTO.birthDate());
+        author.setNationality(authorDTO.nationality());
+
+        authorService.updateAuthor(author);
+        return ResponseEntity.noContent().build();
+    }
+
 
 }
