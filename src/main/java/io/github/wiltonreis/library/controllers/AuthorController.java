@@ -2,9 +2,9 @@ package io.github.wiltonreis.library.controllers;
 
 import io.github.wiltonreis.library.controllers.DTO.AuthorDTO;
 import io.github.wiltonreis.library.controllers.DTO.ErrorResponse;
-import io.github.wiltonreis.library.controllers.DTO.ViewAuthorDTO;
 import io.github.wiltonreis.library.exception.DuplicatedRecordException;
 import io.github.wiltonreis.library.exception.OperationNotAllowed;
+import io.github.wiltonreis.library.controllers.mappers.AuthorMapper;
 import io.github.wiltonreis.library.model.Author;
 import io.github.wiltonreis.library.services.AuthorService;
 import jakarta.validation.Valid;
@@ -24,11 +24,12 @@ import java.util.UUID;
 public class AuthorController {
 
     private final AuthorService authorService;
+    private final AuthorMapper authorMapper;
 
     @PostMapping
     public ResponseEntity<Object> saveAuthor(@RequestBody @Valid AuthorDTO authorDTO){
         try {
-            Author author = authorDTO.toAuthor();
+            Author author = authorMapper.toEntity(authorDTO);
             Author authorSaved = authorService.saveAuthor(author);
 
             URI uri = ServletUriComponentsBuilder
@@ -45,22 +46,18 @@ public class AuthorController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ViewAuthorDTO> getAuthor(@PathVariable String id){
+    public ResponseEntity<AuthorDTO> getAuthor(@PathVariable String id){
         UUID idAuthor = UUID.fromString(id);
 
         Optional<Author> authorOptional = authorService.getAuthor(idAuthor);
 
-        if(authorOptional.isEmpty()) return ResponseEntity.notFound().build();
+        return authorService.getAuthor(idAuthor)
+                .map(author ->
+                {
+                    AuthorDTO authorDTO = authorMapper.toDTO(author);
+                    return ResponseEntity.ok(authorDTO);
+                }).orElseGet( () -> ResponseEntity.notFound().build());
 
-        Author author = authorOptional.get();
-        ViewAuthorDTO viewAuthor = new ViewAuthorDTO(
-                author.getId(),
-                author.getName(),
-                author.getBirthDate(),
-                author.getNationality()
-        );
-
-        return ResponseEntity.ok(viewAuthor);
     }
 
     @DeleteMapping("/{id}")
@@ -82,18 +79,15 @@ public class AuthorController {
 
 
     @GetMapping
-    public ResponseEntity<List<ViewAuthorDTO>> filterAuthor(
+    public ResponseEntity<List<AuthorDTO>> filterAuthor(
             @RequestParam(value = "name", required = false) String name,
             @RequestParam(value = "nationality", required = false) String nationality){
 
 
         List<Author> authors = authorService.filterAuthor(name, nationality);
-        List<ViewAuthorDTO> result = authors.stream().map(author -> new ViewAuthorDTO(
-                author.getId(),
-                author.getName(),
-                author.getBirthDate(),
-                author.getNationality()
-        )).toList();
+        List<AuthorDTO> result = authors.stream()
+                .map(authorMapper::toDTO)
+                .toList();
 
         return ResponseEntity.ok(result);
     }

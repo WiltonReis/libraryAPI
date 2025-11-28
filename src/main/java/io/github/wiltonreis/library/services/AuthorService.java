@@ -6,6 +6,8 @@ import io.github.wiltonreis.library.repositories.AuthorRepository;
 import io.github.wiltonreis.library.repositories.BookRepository;
 import io.github.wiltonreis.library.validators.AuthorValidator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -42,13 +44,20 @@ public class AuthorService {
 
     public List<Author> filterAuthor(String name, String nationality){
 
-        if(name != null && nationality != null) return authorRepository.findByNameAndNationality(name, nationality);
+        Author author = new Author();
+        author.setName(name);
+        author.setNationality(nationality);
 
-        if(name != null) return authorRepository.findByName(name);
+        ExampleMatcher matcher = ExampleMatcher
+                .matching()
+                .withIgnoreNullValues()
+                .withIgnoreCase()
+                .withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING);
 
-        if(nationality != null) return authorRepository.findByNationality(nationality);
 
-        return authorRepository.findAll();
+        Example<Author> authorExample = Example.of(author, matcher);
+
+        return authorRepository.findAll(authorExample);
     }
 
     private boolean hasBook(UUID id){
