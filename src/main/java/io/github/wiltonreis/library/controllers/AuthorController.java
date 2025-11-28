@@ -1,9 +1,13 @@
 package io.github.wiltonreis.library.controllers;
 
 import io.github.wiltonreis.library.controllers.DTO.AuthorDTO;
+import io.github.wiltonreis.library.controllers.DTO.ErrorResponse;
 import io.github.wiltonreis.library.controllers.DTO.ViewAuthorDTO;
+import io.github.wiltonreis.library.exception.DuplicatedRecordException;
+import io.github.wiltonreis.library.exception.OperationNotAllowed;
 import io.github.wiltonreis.library.model.Author;
 import io.github.wiltonreis.library.services.AuthorService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -15,27 +19,28 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/authors")
+@RequiredArgsConstructor
 public class AuthorController {
 
-    private AuthorService authorService;
-
-    public AuthorController(AuthorService authorService){
-        this.authorService = authorService;
-    }
+    private final AuthorService authorService;
 
     @PostMapping
-    public ResponseEntity<Void> saveAuthor(@RequestBody AuthorDTO authorDTO){
+    public ResponseEntity<Object> saveAuthor(@RequestBody AuthorDTO authorDTO){
+        try {
+            Author author = authorDTO.toAuthor();
+            Author authorSaved = authorService.saveAuthor(author);
 
-        Author author = authorDTO.toAuthor();
-        Author authorSaved = authorService.saveAuthor(author);
+            URI uri = ServletUriComponentsBuilder
+                    .fromCurrentRequest()
+                    .path("/{id}")
+                    .buildAndExpand(authorSaved.getId())
+                    .toUri();
 
-        URI uri = ServletUriComponentsBuilder
-                .fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(authorSaved.getId())
-                .toUri();
-
-        return ResponseEntity.created(uri).build();
+            return ResponseEntity.created(uri).build();
+        } catch (DuplicatedRecordException e){
+            ErrorResponse error = ErrorResponse.conflict(e.getMessage());
+            return ResponseEntity.status(error.status()).body(error);
+        }
     }
 
     @GetMapping("/{id}")
@@ -58,16 +63,22 @@ public class AuthorController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteAuthor(@PathVariable String id){
-        UUID idAuthor = UUID.fromString(id);
+    public ResponseEntity<Object> deleteAuthor(@PathVariable String id){
+        try {
+            UUID idAuthor = UUID.fromString(id);
 
-        Optional<Author> authorOptional = authorService.getAuthor(idAuthor);
+            Optional<Author> authorOptional = authorService.getAuthor(idAuthor);
 
-        if(authorOptional.isEmpty()) return ResponseEntity.notFound().build();
+            if (authorOptional.isEmpty()) return ResponseEntity.notFound().build();
 
-        authorService.deleteAuthor(idAuthor);
-        return ResponseEntity.ok().build();
+            authorService.deleteAuthor(idAuthor);
+            return ResponseEntity.ok().build();
+        } catch (OperationNotAllowed e){
+            ErrorResponse erro = ErrorResponse.standardError(e.getMessage());
+            return ResponseEntity.status(erro.status()).body(erro);
+        }
     }
+
 
     @GetMapping
     public ResponseEntity<List<ViewAuthorDTO>> filterAuthor(
@@ -87,21 +98,26 @@ public class AuthorController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Void> updateAuthor(@PathVariable String id, @RequestBody AuthorDTO authorDTO){
-        UUID idAuthor = UUID.fromString(id);
+    public ResponseEntity<Object> updateAuthor(@PathVariable String id, @RequestBody AuthorDTO authorDTO){
+        try{
+            UUID idAuthor = UUID.fromString(id);
 
-        Optional<Author> authorOptional = authorService.getAuthor(idAuthor);
+            Optional<Author> authorOptional = authorService.getAuthor(idAuthor);
 
-        if(authorOptional.isEmpty()) return ResponseEntity.notFound().build();
+            if (authorOptional.isEmpty()) return ResponseEntity.notFound().build();
 
-        Author author = authorOptional.get();
+            Author author = authorOptional.get();
 
-        author.setName(authorDTO.name());
-        author.setBirthDate(authorDTO.birthDate());
-        author.setNationality(authorDTO.nationality());
+            author.setName(authorDTO.name());
+            author.setBirthDate(authorDTO.birthDate());
+            author.setNationality(authorDTO.nationality());
 
-        authorService.updateAuthor(author);
-        return ResponseEntity.noContent().build();
+            authorService.updateAuthor(author);
+            return ResponseEntity.noContent().build();
+        } catch (DuplicatedRecordException e){
+            ErrorResponse error = ErrorResponse.conflict(e.getMessage());
+            return ResponseEntity.status(error.status()).body(error);
+        }
     }
 
 

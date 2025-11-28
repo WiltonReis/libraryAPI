@@ -34,6 +34,6 @@ public class Book {
     private GenreBook genre;
 
     @ManyToOne
-    @JoinColumn(name = "id_author")
+    @JoinColumn(name = "author_id")
     private Author author;
 }
