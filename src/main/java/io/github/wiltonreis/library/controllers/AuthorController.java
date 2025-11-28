@@ -7,6 +7,7 @@ import io.github.wiltonreis.library.exception.DuplicatedRecordException;
 import io.github.wiltonreis.library.exception.OperationNotAllowed;
 import io.github.wiltonreis.library.model.Author;
 import io.github.wiltonreis.library.services.AuthorService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,7 +26,7 @@ public class AuthorController {
     private final AuthorService authorService;
 
     @PostMapping
-    public ResponseEntity<Object> saveAuthor(@RequestBody AuthorDTO authorDTO){
+    public ResponseEntity<Object> saveAuthor(@RequestBody @Valid AuthorDTO authorDTO){
         try {
             Author author = authorDTO.toAuthor();
             Author authorSaved = authorService.saveAuthor(author);
@@ -98,7 +99,7 @@ public class AuthorController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Object> updateAuthor(@PathVariable String id, @RequestBody AuthorDTO authorDTO){
+    public ResponseEntity<Object> updateAuthor(@PathVariable String id, @RequestBody @Valid AuthorDTO authorDTO){
         try{
             UUID idAuthor = UUID.fromString(id);
 
