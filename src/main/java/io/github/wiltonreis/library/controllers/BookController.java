@@ -4,6 +4,7 @@ import io.github.wiltonreis.library.controllers.DTO.BookRegistrationDTO;
 import io.github.wiltonreis.library.controllers.DTO.BookSearchResultDTO;
 import io.github.wiltonreis.library.controllers.mappers.BookMapper;
 import io.github.wiltonreis.library.model.Book;
+import io.github.wiltonreis.library.model.GenreBook;
 import io.github.wiltonreis.library.services.BookService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -44,7 +46,7 @@ public class BookController implements GenericController{
             return ResponseEntity.ok(bookDTO);
         }).orElseGet( () -> ResponseEntity.notFound().build());
     }
-    
+
     public ResponseEntity<Object> deleteBook(@PathVariable String id){
         UUID idBook = UUID.fromString(id);
 
@@ -56,4 +58,19 @@ public class BookController implements GenericController{
         }).orElseGet( () -> ResponseEntity.notFound().build());
     }
 
+    @GetMapping
+    public ResponseEntity<List<BookSearchResultDTO>> filterBook(
+            @RequestParam(value = "isbn", required = false) String isbn,
+            @RequestParam(value = "title", required = false) String title,
+            @RequestParam(value = "author-name", required = false) String authorName,
+            @RequestParam(value = "genre", required = false) GenreBook genre,
+            @RequestParam(value = "publication-year", required = false) Integer publicationYear
+    ){
+        List<Book> books = bookService.filterBook(isbn, title, authorName, genre, publicationYear);
+        List<BookSearchResultDTO> result = books.stream()
+                .map(bookMapper::toDTO)
+                .toList();
+
+        return ResponseEntity.ok(result);
+    }
 }
