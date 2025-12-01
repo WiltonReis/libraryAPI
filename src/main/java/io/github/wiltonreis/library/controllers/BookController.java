@@ -8,6 +8,7 @@ import io.github.wiltonreis.library.model.GenreBook;
 import io.github.wiltonreis.library.services.BookService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -60,17 +61,19 @@ public class BookController implements GenericController{
     }
 
     @GetMapping
-    public ResponseEntity<List<BookSearchResultDTO>> filterBook(
+    public ResponseEntity<Page<BookSearchResultDTO>> filterBook(
             @RequestParam(value = "isbn", required = false) String isbn,
             @RequestParam(value = "title", required = false) String title,
             @RequestParam(value = "author-name", required = false) String authorName,
             @RequestParam(value = "genre", required = false) GenreBook genre,
-            @RequestParam(value = "publication-year", required = false) Integer publicationYear
+            @RequestParam(value = "publication-year", required = false) Integer publicationYear,
+            @RequestParam(value = "page", defaultValue = "0") Integer page,
+            @RequestParam(value = "size", defaultValue = "10") Integer size
+
     ){
-        List<Book> books = bookService.filterBook(isbn, title, authorName, genre, publicationYear);
-        List<BookSearchResultDTO> result = books.stream()
-                .map(bookMapper::toDTO)
-                .toList();
+        Page<Book> pages = bookService.filterBook(isbn, title, authorName, genre, publicationYear, page, size);
+
+        Page<BookSearchResultDTO> result = pages.map(bookMapper::toDTO);
 
         return ResponseEntity.ok(result);
     }

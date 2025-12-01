@@ -5,6 +5,9 @@ import io.github.wiltonreis.library.model.GenreBook;
 import io.github.wiltonreis.library.repositories.BookRepository;
 import io.github.wiltonreis.library.validators.BookValidator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -34,7 +37,8 @@ public class BookService {
         bookRepository.deleteById(idBook);
     }
 
-    public List<Book> filterBook(String isbn,  String title, String authorName, GenreBook genre, Integer publicationYear){
+    public Page<Book> filterBook(
+            String isbn,  String title, String authorName, GenreBook genre, Integer publicationYear, Integer page, Integer size){
         Specification<Book> spec = ((root, query, cb) -> cb.conjunction());
 
         if(isbn != null) spec = spec.and(isbnEqual(isbn));
@@ -47,7 +51,9 @@ public class BookService {
 
         if(publicationYear != null) spec = spec.and(publicationYearEqual(publicationYear));
 
-        return bookRepository.findAll(spec);
+        Pageable pageable = PageRequest.of(page, size);
+
+        return bookRepository.findAll(spec, pageable);
     }
 
     public void updateBook(Book book) {
