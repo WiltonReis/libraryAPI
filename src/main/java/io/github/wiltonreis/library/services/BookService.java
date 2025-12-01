@@ -3,6 +3,7 @@ package io.github.wiltonreis.library.services;
 import io.github.wiltonreis.library.model.Book;
 import io.github.wiltonreis.library.model.GenreBook;
 import io.github.wiltonreis.library.repositories.BookRepository;
+import io.github.wiltonreis.library.validators.BookValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -18,8 +19,10 @@ import static io.github.wiltonreis.library.repositories.specs.BookSpecs.*;
 public class BookService {
 
     private final BookRepository bookRepository;
+    private final BookValidator validator;
 
     public Book save(Book book) {
+        validator.validate(book);
         return bookRepository.save(book);
     }
 
@@ -45,5 +48,11 @@ public class BookService {
         if(publicationYear != null) spec = spec.and(publicationYearEqual(publicationYear));
 
         return bookRepository.findAll(spec);
+    }
+
+    public void updateBook(Book book) {
+        if (book.getId() == null) throw new IllegalArgumentException("Book not registered");
+        validator.validate(book);
+        bookRepository.save(book);
     }
 }

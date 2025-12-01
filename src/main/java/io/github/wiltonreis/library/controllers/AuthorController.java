@@ -1,10 +1,7 @@
 package io.github.wiltonreis.library.controllers;
 
 import io.github.wiltonreis.library.controllers.DTO.AuthorDTO;
-import io.github.wiltonreis.library.controllers.DTO.ErrorResponse;
 import io.github.wiltonreis.library.controllers.mappers.AuthorMapper;
-import io.github.wiltonreis.library.exception.DuplicatedRecordException;
-import io.github.wiltonreis.library.exception.OperationNotAllowed;
 import io.github.wiltonreis.library.model.Author;
 import io.github.wiltonreis.library.services.AuthorService;
 import jakarta.validation.Valid;

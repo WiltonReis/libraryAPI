@@ -3,6 +3,7 @@ package io.github.wiltonreis.library.controllers.Common;
 import io.github.wiltonreis.library.controllers.DTO.ErrorField;
 import io.github.wiltonreis.library.controllers.DTO.ErrorResponse;
 import io.github.wiltonreis.library.exception.DuplicatedRecordException;
+import io.github.wiltonreis.library.exception.InvalidFieldException;
 import io.github.wiltonreis.library.exception.OperationNotAllowed;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
@@ -39,6 +40,15 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handlerOperationNotAllowed(OperationNotAllowed e){
         return ErrorResponse.standardError(e.getMessage());
+    }
+
+    @ExceptionHandler(InvalidFieldException.class)
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    public ErrorResponse handlerInvalidFieldException(InvalidFieldException e){
+
+        return new ErrorResponse(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Validation error", List.of(
+                new ErrorField(e.getField(), e.getMessage())
+        ));
     }
 
     @ExceptionHandler
