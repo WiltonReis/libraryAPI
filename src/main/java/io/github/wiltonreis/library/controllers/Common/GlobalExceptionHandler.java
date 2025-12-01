@@ -2,6 +2,8 @@ package io.github.wiltonreis.library.controllers.Common;
 
 import io.github.wiltonreis.library.controllers.DTO.ErrorField;
 import io.github.wiltonreis.library.controllers.DTO.ErrorResponse;
+import io.github.wiltonreis.library.exception.DuplicatedRecordException;
+import io.github.wiltonreis.library.exception.OperationNotAllowed;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -27,4 +29,21 @@ public class GlobalExceptionHandler {
         return new ErrorResponse(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Validation error", listErrors);
     }
 
+    @ExceptionHandler(DuplicatedRecordException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handlerDuplicatedRecordException(DuplicatedRecordException e){
+        return ErrorResponse.conflict(e.getMessage());
+    }
+
+    @ExceptionHandler(OperationNotAllowed.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handlerOperationNotAllowed(OperationNotAllowed e){
+        return ErrorResponse.standardError(e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleUnhandledError(RuntimeException e){
+        return new ErrorResponse(500, "Unexpected error", List.of());
+    }
 }
