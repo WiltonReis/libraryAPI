@@ -10,16 +10,17 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/books")
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyRole('OPERATOR', 'MANAGER')")
 public class BookController implements GenericController{
 
     private final BookService bookService;

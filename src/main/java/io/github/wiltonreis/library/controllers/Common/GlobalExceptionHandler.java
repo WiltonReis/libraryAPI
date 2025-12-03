@@ -6,6 +6,7 @@ import io.github.wiltonreis.library.exception.DuplicatedRecordException;
 import io.github.wiltonreis.library.exception.InvalidFieldException;
 import io.github.wiltonreis.library.exception.OperationNotAllowed;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -51,9 +52,16 @@ public class GlobalExceptionHandler {
         ));
     }
 
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorResponse handleAccesDeniedException(AccessDeniedException e){
+        return new ErrorResponse(HttpStatus.FORBIDDEN.value(), "Access denied", List.of());
+    }
+
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleUnhandledError(RuntimeException e){
+        e.printStackTrace();
         return new ErrorResponse(500, "Unexpected error", List.of());
     }
 }

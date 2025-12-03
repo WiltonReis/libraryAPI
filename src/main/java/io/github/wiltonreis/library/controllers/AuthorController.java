@@ -7,6 +7,7 @@ import io.github.wiltonreis.library.services.AuthorService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -23,6 +24,7 @@ public class AuthorController implements GenericController{
     private final AuthorMapper authorMapper;
 
     @PostMapping
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<Void> saveAuthor(@RequestBody @Valid AuthorDTO authorDTO){
         Author author = authorMapper.toEntity(authorDTO);
         Author authorSaved = authorService.saveAuthor(author);
@@ -33,6 +35,7 @@ public class AuthorController implements GenericController{
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('OPERATOR', 'MANAGER')")
     public ResponseEntity<AuthorDTO> getAuthor(@PathVariable String id){
         UUID idAuthor = UUID.fromString(id);
 
@@ -48,6 +51,7 @@ public class AuthorController implements GenericController{
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<Object> deleteAuthor(@PathVariable String id){
 
         UUID idAuthor = UUID.fromString(id);
@@ -62,6 +66,7 @@ public class AuthorController implements GenericController{
 
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('OPERATOR', 'MANAGER')")
     public ResponseEntity<List<AuthorDTO>> filterAuthor(
             @RequestParam(value = "name", required = false) String name,
             @RequestParam(value = "nationality", required = false) String nationality){
@@ -76,6 +81,7 @@ public class AuthorController implements GenericController{
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<Void> updateAuthor(@PathVariable String id, @RequestBody @Valid AuthorDTO authorDTO){
         UUID idAuthor = UUID.fromString(id);
 
