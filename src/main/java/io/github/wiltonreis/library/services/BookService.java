@@ -2,7 +2,9 @@ package io.github.wiltonreis.library.services;
 
 import io.github.wiltonreis.library.model.Book;
 import io.github.wiltonreis.library.model.GenreBook;
+import io.github.wiltonreis.library.model.User;
 import io.github.wiltonreis.library.repositories.BookRepository;
+import io.github.wiltonreis.library.security.SecurityService;
 import io.github.wiltonreis.library.validators.BookValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -23,9 +25,12 @@ public class BookService {
 
     private final BookRepository bookRepository;
     private final BookValidator validator;
+    private final SecurityService securityService;
 
     public Book save(Book book) {
         validator.validate(book);
+        User user = securityService.getCurrentUser();
+        book.setUser(user);
         return bookRepository.save(book);
     }
 

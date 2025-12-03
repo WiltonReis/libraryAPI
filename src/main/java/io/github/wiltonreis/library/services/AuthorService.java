@@ -2,8 +2,10 @@ package io.github.wiltonreis.library.services;
 
 import io.github.wiltonreis.library.exception.OperationNotAllowed;
 import io.github.wiltonreis.library.model.Author;
+import io.github.wiltonreis.library.model.User;
 import io.github.wiltonreis.library.repositories.AuthorRepository;
 import io.github.wiltonreis.library.repositories.BookRepository;
+import io.github.wiltonreis.library.security.SecurityService;
 import io.github.wiltonreis.library.validators.AuthorValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Example;
@@ -21,9 +23,12 @@ public class AuthorService {
     private final AuthorRepository authorRepository;
     private final AuthorValidator authorValidator;
     private final BookRepository bookRepository;
+    private final SecurityService securityService;
 
     public Author saveAuthor(Author author){
         authorValidator.validate(author);
+        User user = securityService.getCurrentUser();
+        author.setUser(user);
         return authorRepository.save(author);
     }
 
