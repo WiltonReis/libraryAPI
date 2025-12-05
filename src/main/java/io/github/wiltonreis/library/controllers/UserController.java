@@ -4,6 +4,7 @@ import io.github.wiltonreis.library.controllers.DTO.UserDTO;
 import io.github.wiltonreis.library.controllers.mappers.UserMapper;
 import io.github.wiltonreis.library.model.User;
 import io.github.wiltonreis.library.services.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +19,7 @@ public class UserController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public void save(@RequestBody UserDTO userDTO){
+    public void save(@RequestBody @Valid UserDTO userDTO){
         User user = userMapper.toEntity(userDTO);
         userService.save(user);
     }

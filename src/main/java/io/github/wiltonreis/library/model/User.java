@@ -23,6 +23,9 @@ public class User {
     @Column(nullable = false, length = 300)
     private String password;
 
+    @Column(nullable = false, length = 150)
+    private String email;
+
     @Type(ListArrayType.class)
     @Column(nullable = false, columnDefinition = "varchar[]")
     private List<String> roles;

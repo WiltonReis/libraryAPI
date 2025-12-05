@@ -1,101 +1,76 @@
 # 📚 Library API
 
-API RESTful para gerenciamento de uma livraria, desenvolvida como parte de um estudo aprofundado sobre o ecossistema **Spring Boot**.
+![Java](https://img.shields.io/badge/Java-21%2B-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-3-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white)
+![Spring Security](https://img.shields.io/badge/Spring_Security-6DB33F?style=for-the-badge&logo=spring-security&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
 
-O projeto foca em boas práticas de engenharia de software, incluindo arquitetura em camadas, validação de dados, tratamento de exceções personalizado e integridade referencial.
+API RESTful completa para gerenciamento de uma livraria, desenvolvida como parte de um estudo aprofundado sobre o ecossistema **Spring Boot**.
+
+O projeto segue rigorosas boas práticas de engenharia de software, apresentando uma arquitetura em camadas, **segurança robusta com OAuth2**, validação de dados, integridade referencial e tratamento global de exceções.
 
 ---
 
 ## 🚀 Tecnologias Utilizadas
-- **Java 21+**
+- **Java 21**
 - **Spring Boot 3**
+- **Spring Security** (Autenticação e Autorização)
+- **OAuth2 Client** (Login Social com Google)
 - **Spring Data JPA** (Persistência de dados)
 - **PostgreSQL** (Banco de dados relacional)
+- **MapStruct** (Mapeamento inteligente Entidade ↔ DTO)
 - **Lombok** (Redução de boilerplate)
-- **Bean Validation** (Validações de DTOs)
+- **Bean Validation** (Validações de dados)
 - **Maven** (Gerenciamento de dependências)
 
 ---
 
-## ⚙️ Funcionalidades e Práticas Implementadas
+## ⚙️ Funcionalidades e Arquitetura
 
-## 👤 Gestão de Autores
+### 🔐 Segurança e Autenticação (Novo!)
+O sistema implementa um modelo híbrido de segurança:
+- **Login Social:** Integração com Google via OAuth2.
+- **Login Tradicional:** Autenticação via formulário com credenciais salvas no banco.
+- **Criptografia:** Senhas de usuários protegidas com hash **BCrypt**.
+- **Gestão de Usuários:** Cadastro de novos usuários (Roles/Permissões).
+- **Proteção:** Endpoints protegidos exigindo sessão autenticada.
 
-### ✨ Estruturas e Validações
-- Uso de **DTOs com Java Records** (`AuthorDTO`) para imutabilidade.
-- **Validações customizadas** via `AuthorValidator`:
-  - Evita cadastros duplicados validando **nome**, **data de nascimento** e **nacionalidade**.
+### 👤 Gestão de Autores
+- **Imutabilidade:** Uso de Java Records para DTOs.
+- **Validações:** Regras de negócio que impedem duplicidade de registros (Nome, Data Nasc., Nacionalidade).
+- **Integridade:** Bloqueio de exclusão caso o autor possua livros vinculados.
+- **Auditoria:** Rastreamento automático de data de criação e atualização.
 
-### 🔍 Busca Dinâmica
-- Implementada com **Query by Example (ExampleMatcher)**:
-  - Filtros flexíveis, **case-insensitive** e que ignoram campos nulos.
+### 📚 Gestão de Livros
+- **Regras de Negócio:**
+  - Unicidade de ISBN.
+  - Preço obrigatório apenas para livros publicados a partir de 2020.
+- **Busca Avançada:** Filtros dinâmicos com **JPA Specifications** (Título, Gênero, Ano, Nome do Autor).
+- **Paginação:** Otimização de listagens grandes via `Pageable`.
 
-### 🔒 Integridade de Dados
-- Exclusão bloqueada para autores com livros associados.
-- Retorna `OperationNotAllowed` em caso de violação.
-
-### 🕒 Auditoria automática
-- Campos com `@CreatedDate` e `@LastModifiedDate`.
----
-
-## 📖 Gestão de Livros
-
-### ✨ Estruturas
-- Entidade `Book` com relacionamento `@ManyToOne` para `Author`.
-- Enum `GenreBook` para gêneros literários.
-
-### 🔎 Validações de Negócio
-- `BookValidator`:
-  - Controla unicidade do **ISBN**.
-  - Regra: se o ano de publicação ≥ 2020, o **preço** é obrigatório.
-    - Caso contrário → `InvalidFieldException`.
-
-### 🔍 Filtros Avançados (Specifications)
-- Implementados com **JPA Specifications** permitindo filtros combinados:
-  - ISBN
-  - Título (contains, ignore-case)
-  - Gênero
-  - Ano de publicação
-  - Nome do autor
-- Uso de `Join` e funções SQL (ex.: `to_char`) para otimização.
-
-### 📄 Paginação
-- Implementada com `Pageable`.
-- Endpoints de listagem retornam `Page<BookSearchResultDTO>`.
-
----
-
-## 🚨 Tratamento Global de Exceções
-
-Configurado via `@RestControllerAdvice`:
-
-| Exceção | Descrição | HTTP Status |
-|--------|-----------|-------------|
-| `MethodArgumentNotValidException` | Erro de validação Bean | **422** |
-| `DuplicatedRecordException` | Registro duplicado | **409** |
-| `OperationNotAllowed` | Operação proibida | **400** |
-| `InvalidFieldException` | Regra de negócio violada | **422** |
-
-
-### ❗ Estrutura Padronizada de Erro (`ErrorResponse`)
-
-Todos os erros seguem o padrão **Problem Details**, garantindo clareza e consistência no retorno da API.
-
-```json
-{
-  "status": 422,
-  "message": "Validation error",
-  "errors": [
-    {
-      "field": "name",
-      "message": "Detailed error description"
-    }
-  ]
-}
-```
 ---
 
 ## 🔌 Endpoints (API Reference)
+
+> ⚠️ **Atenção:** Com exceção das rotas de Login e Cadastro de Usuário, todos os endpoints exigem autenticação.
+
+### 👤 Usuários & Autenticação
+
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| `POST` | `/users` | Cria um novo usuário (Login, Senha, Email, Roles). **Público**. |
+| `GET` | `/login` | Página de login (Google ou Credenciais). |
+
+#### 📦 **Exemplo de Payload (Criação)**
+### Criar Usuário
+```json
+{
+  "login": "wilton_dev",
+  "password": "strongPassword123",
+  "email": "dev@example.com",
+  "roles": ["ADMIN", "OPERATOR"]
+}
+```
 
 ### **Autores** (`/authors`)
 
@@ -108,6 +83,7 @@ Todos os erros seguem o padrão **Problem Details**, garantindo clareza e consis
 | `DELETE` | `/authors/{id}` | Remove um autor (somente se não houver livros associados). |
 
 #### 📦 **Exemplo de Payload (Criação)**
+### Criar Autor
 
 ```json
 {
@@ -142,6 +118,8 @@ Todos os erros seguem o padrão **Problem Details**, garantindo clareza e consis
 | `size`             | Integer  | `10`             | Quantidade de itens por página    |
 
 #### 📦 **Exemplo de Payload (Criação)**
+### Criar Livro
+
 
 ```json
 {
@@ -156,6 +134,38 @@ Todos os erros seguem o padrão **Problem Details**, garantindo clareza e consis
 ```
 
 ---
+
+## 🚨 Tratamento Global de Exceções
+
+Configurado via `@RestControllerAdvice`:
+
+| Exceção | Descrição | HTTP Status |
+|--------|-----------|-------------|
+| `MethodArgumentNotValidException` | Erro de validação Bean | **422** |
+| `DuplicatedRecordException` | Registro duplicado | **409** |
+| `OperationNotAllowed` | Operação proibida | **400** |
+| `InvalidFieldException` | Regra de negócio violada | **422** |
+
+
+### ❗ Estrutura Padronizada de Erro (`ErrorResponse`)
+
+Todos os erros seguem o padrão **Problem Details**, garantindo clareza e consistência no retorno da API.
+
+```json
+{
+  "status": 422,
+  "message": "Validation error",
+  "errors": [
+    {
+      "field": "name",
+      "message": "Detailed error description"
+    }
+  ]
+}
+```
+---
+
+
 
 ## 🖥️ Como Rodar o Projeto Localmente
 
@@ -173,20 +183,29 @@ Todos os erros seguem o padrão **Problem Details**, garantindo clareza e consis
 git clone https://github.com/WiltonReis/library-api.git
 ```
 
-#### 2. Configure o banco de dados no arquivo:
+#### 2. Configure o arquivo application:
 ```
-src/main/resources/application.properties
+src/main/resources/application.yaml
 ```
 
 Exemplo:
 
-```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/library_db
-spring.datasource.username=seu_usuario
-spring.datasource.password=sua_senha
-
-spring.jpa.hibernate.ddl-auto=update
-spring.jpa.show-sql=true
+```yaml
+spring:
+  application:
+    name: library-api
+  datasource:
+    url: jdbc:postgresql://localhost:5432/library
+    username: postgres
+    password: 123
+    driver-class-name: org.postgresql.Driver
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}     # Defina nas variáveis de ambiente ou substitua aqui
+            client-secret: ${GOOGLE_CLIENT_SECRET}
 ```
 
 #### 3. Execute a aplicação:
@@ -200,7 +219,6 @@ mvn spring-boot:run
 🚧 **Em construção** — evoluindo conforme avanço no curso de Spring Boot.
 
 ### Próximas implementações:
-- 🔐 Autenticação e Autorização (Spring Security)
 - 🧪 Testes unitários e de integração
 - 📘 Documentação com Swagger/OpenAPI
 
