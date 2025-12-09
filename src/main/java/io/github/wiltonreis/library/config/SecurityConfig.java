@@ -33,6 +33,7 @@ public class SecurityConfig {
                 })
                 .authorizeHttpRequests(authorize -> {
                     authorize.requestMatchers(HttpMethod.POST, "/users/**").permitAll();
+                    authorize.requestMatchers("/login").permitAll();
                     authorize.anyRequest().authenticated();
                 })
                 .oauth2Login(oauth2 -> {

@@ -55,14 +55,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ErrorResponse handleAccessDeniedException(AccessDeniedException e){
-        e.printStackTrace();
         return new ErrorResponse(HttpStatus.FORBIDDEN.value(), "Access denied", List.of());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleUnhandledError(RuntimeException e){
-        e.printStackTrace();
         return new ErrorResponse(500, "Unexpected error", List.of());
     }
 }
