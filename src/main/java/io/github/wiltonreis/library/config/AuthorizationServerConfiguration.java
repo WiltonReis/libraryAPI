@@ -16,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
+import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
 import org.springframework.security.oauth2.server.authorization.settings.OAuth2TokenFormat;
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
@@ -37,6 +38,8 @@ public class AuthorizationServerConfiguration {
     public SecurityFilterChain authServerSecurityFilterChain(HttpSecurity http) throws Exception {
 
         var oAuth2AuthorizationServerConfigurer = new OAuth2AuthorizationServerConfigurer();
+
+        http.securityMatcher(oAuth2AuthorizationServerConfigurer.getEndpointsMatcher());
 
         http.with(oAuth2AuthorizationServerConfigurer, Customizer.withDefaults());
 
@@ -62,6 +65,7 @@ public class AuthorizationServerConfiguration {
         return TokenSettings.builder()
                 .accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)
                 .accessTokenTimeToLive(Duration.ofMinutes(60))
+                .refreshTokenTimeToLive(Duration.ofMinutes(90))
                 .build();
     }
 
@@ -86,6 +90,26 @@ public class AuthorizationServerConfiguration {
         return OAuth2AuthorizationServerConfiguration.jwtDecoder(jwkSource);
     }
 
+    @Bean
+    public AuthorizationServerSettings authorizationServerSettings(){
+        return AuthorizationServerSettings.builder()
+                // Obeter token
+                .tokenEndpoint("/oauth2/token")
+                // Consutla status do token
+                .tokenIntrospectionEndpoint("oauth2/introspect")
+                // revogar
+                .tokenRevocationEndpoint("oauth2/revoke")
+                // autorizar
+                .authorizationEndpoint("oauth2/authorize")
+                // informções do usuario OPEN ID CONNECT
+                .oidcUserInfoEndpoint("/oauth2/iserinfo")
+                // obeter chave publica
+                .jwkSetEndpoint("/oauth2/jwks")
+                // logout
+                .oidcLogoutEndpoint("/oauth2/logout")
+                .build();
+    }
+
     private RSAKey generateRsa() throws Exception{
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
         keyPairGenerator.initialize(2048);
@@ -95,9 +119,8 @@ public class AuthorizationServerConfiguration {
         RSAPublicKey publicKey = (RSAPublicKey) keyPair.getPublic();
         RSAPrivateKey privateKey = (RSAPrivateKey) keyPair.getPrivate();
 
-        return new RSAKey.Builder()
+        return new RSAKey.Builder(publicKey)
                 .privateKey(privateKey)
-                .publicKey(publicKey)
                 .keyID(UUID.randomUUID().toString())
                 .build();
     }
