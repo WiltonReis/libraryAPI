@@ -1,0 +1,22 @@
+[33m336b278[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m feat(auth): add and configure authorization and resource server
+[33m6e75474[m[33m ([m[1;31morigin/main[m[33m)[m feat(auth): add user registration, login, OAuth2 and Google social login
+[33m8e53ed6[m feat(audit): add user auditing on save operations
+[33m0e31c9f[m feat(security): add role-based access control for book and author methods
+[33m1e736fa[m feat(auth): add custom UserDetailsService implementation
+[33m14b6f28[m feat(auth): implement login and user MVC using in-memory UserDetails
+[33m1ab8ae4[m refactor(book): implement paginated query with filter support
+[33mf5697d5[m feat(book): implement validation logic for saving and updating books
+[33m9fbfb59[m feat(book): implement filtered search using Specification
+[33md49139f[m feat(book): implement getById e delete endpoints
+[33mf87a1ed[m refactor: apply minor improvements to exception handling
+[33m5093186[m feat(book): add MVC structure and create mappers
+[33mb768b45[m feat(author): implement data validation rules for author field
+[33me3ebba2[m feat: add error handling and standardized error response body
+[33mb31be70[m feat(author): add endpoint to update
+[33mf115ace[m feat(author): implement search by name and/or nationality
+[33m093cb4e[m feat(author): add GET and DELETE endpoints
+[33ma2361b6[m refactor(author): add auditing fields for creation and last update
+[33me0e5bf5[m feat(author): add controller, service and repository layers for Author entity
+[33m18613f3[m feat: add datasource configuration class
+[33md52d5e2[m feat: add book and author entities
+[33mbd9423e[m build: project created
