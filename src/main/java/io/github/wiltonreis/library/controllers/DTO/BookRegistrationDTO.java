@@ -10,6 +10,9 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(name = "Registrar Livro", description = "Representa um livro que será cadastrado")
 public record BookRegistrationDTO(
         @ISBN
         @NotBlank(message = "required field")

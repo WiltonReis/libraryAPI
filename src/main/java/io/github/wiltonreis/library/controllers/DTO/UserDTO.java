@@ -5,6 +5,9 @@ import jakarta.validation.constraints.NotBlank;
 
 import java.util.List;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(name = "Usuario", description = "Representa um usuário que será cadastrado ou retornado")
 public record UserDTO(
         @NotBlank(message = "required field")
         String login,

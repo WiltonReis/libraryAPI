@@ -28,7 +28,6 @@ public class SecurityConfig {
                                                    JwtCustomAuthenticationFilter jwtCustomAuthenticationFilter) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
-                .httpBasic(Customizer.withDefaults())
                 .formLogin(configurer -> {
                     configurer.loginPage("/login").permitAll();
                 })
@@ -48,9 +47,10 @@ public class SecurityConfig {
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer(){
-        return web -> web.ignoring().requestMatchers(
+        return  web -> web.ignoring().requestMatchers(
                     "/v2/api-docs",
-                    "/v2/api-docs/**",
+                    "/v3/api-docs",
+                    "/v3/api-docs/**",
                     "/swagger-ui/**",
                     "/swagger-ui.html",
                     "/swagger-resources/**",

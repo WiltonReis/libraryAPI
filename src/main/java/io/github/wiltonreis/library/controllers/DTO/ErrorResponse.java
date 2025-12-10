@@ -4,6 +4,9 @@ import org.springframework.http.HttpStatus;
 
 import java.util.List;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(name = "Erro", description = "Representa um erro que será retornado")
 public record ErrorResponse(int status, String message, List<ErrorField> errors) {
 
     public static ErrorResponse standardError(String message){

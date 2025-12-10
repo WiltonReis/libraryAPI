@@ -6,6 +6,9 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(name = "Livro Resultado", description = "Representa um livro que será retornado")
 public record BookSearchResultDTO(
         UUID id,
         String isbn,

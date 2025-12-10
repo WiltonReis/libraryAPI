@@ -14,26 +14,38 @@ O projeto segue rigorosas boas práticas de engenharia de software, apresentando
 ## 🚀 Tecnologias Utilizadas
 - **Java 21**
 - **Spring Boot 3**
-- **Spring Security** (Autenticação e Autorização)
+- **Spring Authorization Server** (Emissão de Tokens, JWK Source, OIDC)
+- **Spring Security** (Resource Server e Filtros Customizados)
 - **OAuth2 Client** (Login Social com Google)
-- **Spring Data JPA** (Persistência de dados)
-- **PostgreSQL** (Banco de dados relacional)
-- **MapStruct** (Mapeamento inteligente Entidade ↔ DTO)
-- **Lombok** (Redução de boilerplate)
-- **Bean Validation** (Validações de dados)
+- **Spring Data JPA** (Persistência)
+- **PostgreSQL** (Banco de dados)
+- **SpringDoc OpenAPI / Swagger UI** (Documentação Dinâmica)
+- **MapStruct** (Mapeamento DTO ↔ Entidade)
+- **Lombok** (Boilerplate reduction)
+- **Bean Validation** (Validação de dados)
 - **Maven** (Gerenciamento de dependências)
+
 
 ---
 
-## ⚙️ Funcionalidades e Arquitetura
+## ⚙️ Arquitetura e Segurança (Novo!)
 
-### 🔐 Segurança e Autenticação (Novo!)
-O sistema implementa um modelo híbrido de segurança:
-- **Login Social:** Integração com Google via OAuth2.
-- **Login Tradicional:** Autenticação via formulário com credenciais salvas no banco.
-- **Criptografia:** Senhas de usuários protegidas com hash **BCrypt**.
-- **Gestão de Usuários:** Cadastro de novos usuários (Roles/Permissões).
-- **Proteção:** Endpoints protegidos exigindo sessão autenticada.
+### 🔐 Authorization Server
+A aplicação gera seus próprios tokens de acesso:
+- **Assinatura RSA:** Utiliza chaves assimétricas (Públicas/Privadas) geradas via `java.security.KeyPair`.
+- **JWT Customizado:** O token inclui *claims* personalizadas como `authorities` (permissões) e `email`.
+- **Fluxo OAuth2:** Suporte a *Client Credentials* e fluxos de autorização padrão.
+
+### 🛡️ Controle de Acesso (RBAC)
+O sistema define níveis estritos de permissão:
+- **`MANAGER`**: Acesso administrativo total. Pode cadastrar **Clientes API**, e tem controle total sobre **Autores** e **Livros**.
+- **`OPERATOR`**: Perfil operacional. Pode gerenciar **Livros** e visualizar **Autores**, mas **NÃO** pode cadastrar ou excluir autores.
+
+### 📄 Documentação Interativa
+A API possui documentação via Swagger UI, com suporte a autenticação Bearer Token direta no navegador.
+- **URL:** `/swagger-ui.html`
+
+---
 
 ### 👤 Gestão de Autores
 - **Imutabilidade:** Uso de Java Records para DTOs.
@@ -52,7 +64,24 @@ O sistema implementa um modelo híbrido de segurança:
 
 ## 🔌 Endpoints (API Reference)
 
-> ⚠️ **Atenção:** Com exceção das rotas de Login e Cadastro de Usuário, todos os endpoints exigem autenticação.
+> ⚠️ **Atenção:** A maioria das rotas exige autenticação (Header `Authorization: Bearer <token>`).
+
+### 🔑 Gestão de Clientes (`/clients`)
+*Responsável por cadastrar aplicações que podem consumir a API.*
+
+| Método | Endpoint | Permissão | Descrição |
+|--------|----------|-----------|-----------|
+| `POST` | `/clients` | **MANAGER** | Cadastra um novo Client (App) com `client_id`, `secret` e escopos. |
+
+#### 📦 Payload (Client)
+```json
+{
+  "clientId": "front-end-app",
+  "clientSecret": "segredo123",
+  "redirectUri": "http://localhost:3000/authorized",
+  "scope": "read write"
+}
+```
 
 ### 👤 Usuários & Autenticação
 
