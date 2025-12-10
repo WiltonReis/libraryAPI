@@ -1,6 +1,9 @@
 spring:
   application:
     name: library
+  output:
+    ansi:
+      enabled: always
   datasource:
     url: jdbc:postgresql://localhost:5432/library
     username: admin
@@ -8,6 +11,9 @@ spring:
     driver-class-name: org.postgresql.Driver
   jpa:
     show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
   security:
     oauth2:
       client:
@@ -15,5 +21,26 @@ spring:
           google:
             client-id: ${GOOGLE_CLIENT_ID}
             client-secret: ${GOOGLE_CLIENT_SECRET}
+
+logging:
+  pattern:
+    console: "%d{dd-MM-yyyy HH:mm:ss} %clr(%5p) %([%t]) %clr(%-40.40logger){cyan} %clr(:){yellow} - %msg%n"
+  file:
+    name: library.log
+  level:
+    root: warn
+  org:
+    springframework:
+      web: debug
+    io.github.wiltonreis.library: trace
+
+management:
+  server:
+    port: 9090
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
 springdoc:
   override-with-generic-response: false

@@ -5,6 +5,7 @@ import io.github.wiltonreis.library.controllers.DTO.ErrorResponse;
 import io.github.wiltonreis.library.exception.DuplicatedRecordException;
 import io.github.wiltonreis.library.exception.InvalidFieldException;
 import io.github.wiltonreis.library.exception.OperationNotAllowed;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.List;
 
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -40,13 +42,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(OperationNotAllowed.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handlerOperationNotAllowed(OperationNotAllowed e){
+        log.warn("Operação proibida: {}", e.getMessage());
         return ErrorResponse.standardError(e.getMessage());
     }
 
     @ExceptionHandler(InvalidFieldException.class)
     @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
     public ErrorResponse handlerInvalidFieldException(InvalidFieldException e){
-
         return new ErrorResponse(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Validation error", List.of(
                 new ErrorField(e.getField(), e.getMessage())
         ));
@@ -55,12 +57,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ErrorResponse handleAccessDeniedException(AccessDeniedException e){
+        log.warn("Acesso negado: {}", e.getMessage());
         return new ErrorResponse(HttpStatus.FORBIDDEN.value(), "Access denied", List.of());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleUnhandledError(RuntimeException e){
+        log.error("Erro inesperado:", e);
         return new ErrorResponse(500, "Unexpected error", List.of());
     }
 }
